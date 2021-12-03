@@ -1,0 +1,11 @@
+CARGOCMD = cargo
+CARGOFMT = $(CARGOCMD) fmt
+CARGOCHK = $(CARGOCMD) check
+CARGOCPY = $(CARGOCMD) clippy
+CARGORUN = $(CARGOCMD) run
+
+lint:
+	$(CARGOFMT) && $(CARGOCHK) && $(CARGOCPY)
+
+run:
+	$(CARGORUN)
