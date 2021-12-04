@@ -11,9 +11,7 @@ mod bingo {
 
     /// A bingo board.
     #[derive(Debug, Default)]
-    struct Board {
-        numbers: [[(u8, bool); 5]; 5],
-    }
+    struct Board([[(u8, bool); 5]; 5]);
 
     /// A bingo game.
     #[derive(Debug)]
@@ -54,7 +52,7 @@ mod bingo {
                         .map(|s| s.parse::<u8>().unwrap())
                         .enumerate()
                     {
-                        board.numbers[i][j] = (num, false);
+                        board.0[i][j] = (num, false);
                     }
                 }
 
