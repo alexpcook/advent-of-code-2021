@@ -59,6 +59,7 @@ mod direction {
     pub struct Directions(Vec<Direction>);
 
     /// Represents the position of the submarine.
+    #[derive(Default)]
     pub struct Position {
         /// Horizontal distance of the submarine.
         pub distance: u32,
@@ -66,16 +67,6 @@ mod direction {
         pub depth: u32,
         /// Aim of the submarine.
         aim: u32,
-    }
-
-    impl Default for Position {
-        fn default() -> Position {
-            Position {
-                distance: 0,
-                depth: 0,
-                aim: 0,
-            }
-        }
     }
 
     impl fmt::Display for Position {
