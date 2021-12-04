@@ -3,10 +3,11 @@ use bingo::Game;
 pub fn main() {
     println!("### day 4 ###");
 
-    let game = Game::from_file("./day_4.txt");
+    Game::from_file("./day_4.txt").play();
 }
 
 mod bingo {
+    use std::collections::HashSet;
     use std::fs;
 
     /// A bingo board.
@@ -26,6 +27,56 @@ mod bingo {
                 }
             }
             None
+        }
+
+        /// If this board is a winner, return its score wrapped in `Some`, else `None`.
+        fn winner(&self) -> Option<u32> {
+            for i in 0..5 {
+                let mut is_winner = false;
+                for j in 0..5 {
+                    let (_, marked) = self.0[i][j];
+                    if marked {
+                        is_winner = true;
+                    } else {
+                        is_winner = false;
+                        break;
+                    }
+                }
+                if is_winner {
+                    return Some(self.score());
+                }
+            }
+
+            for i in 0..5 {
+                let mut is_winner = false;
+                for j in 0..5 {
+                    let (_, marked) = self.0[j][i];
+                    if marked {
+                        is_winner = true;
+                    } else {
+                        is_winner = false;
+                        break;
+                    }
+                }
+                if is_winner {
+                    return Some(self.score());
+                }
+            }
+
+            None
+        }
+
+        /// Returns the score for the board by summing all unmarked squares.
+        fn score(&self) -> u32 {
+            let mut score = 0;
+            for i in 0..5 {
+                for j in 0..5 {
+                    if !self.0[i][j].1 {
+                        score += self.0[i][j].0;
+                    }
+                }
+            }
+            score
         }
     }
 
@@ -76,6 +127,30 @@ mod bingo {
             }
 
             Game { numbers, boards }
+        }
+
+        /// Plays the bingo game.
+        pub fn play(mut self) {
+            let mut winners = HashSet::with_capacity(100);
+
+            for num in self.numbers {
+                for (i, board) in self.boards.iter_mut().enumerate() {
+                    if winners.get(&i).is_none() {
+                        board.mark(num);
+
+                        if let Some(winner_score) = board.winner() {
+                            println!(
+                                "board: {}, winner score: {}, final number: {}, product: {}",
+                                i,
+                                winner_score,
+                                num,
+                                winner_score * num
+                            );
+                            winners.insert(i);
+                        }
+                    }
+                }
+            }
         }
     }
 }
