@@ -8,6 +8,9 @@ pub fn main() {
 
     // Part 1
     println!("part 1: {}", binary_diagnostic.power_consumption());
+
+    // Part 2
+    println!("part 2: {}", binary_diagnostic.life_support_rating());
 }
 
 mod diagnostic {
@@ -54,6 +57,13 @@ mod diagnostic {
             gamma_rate * epsilon_rate
         }
 
+        /// Calculates the life support rating of the submarine.
+        pub fn life_support_rating(&self) -> u32 {
+            let oxygen_generator_rating = self.get_rating(true);
+            let co2_scrubber_rating = self.get_rating(false);
+            oxygen_generator_rating * co2_scrubber_rating
+        }
+
         /// Calculates the most common bit from `data` at `position`.
         /// Returns `Some(1)` if `1` is most common, `Some(0)` if `0` is most common,
         /// and `None` if `1` and `0` are equally common.
@@ -86,6 +96,50 @@ mod diagnostic {
                 1.. => Some(1),
                 _ => Some(0),
             }
+        }
+
+        /// Gets a rating for the submarine. If `use_most_common` is `true`, returns
+        /// the oxygen generator rating, else returns the CO2 scrubber rating.
+        fn get_rating(&self, use_most_common: bool) -> u32 {
+            let mut data = self.data.clone();
+
+            for i in 0..BINARY_LINE_LENGTH {
+                let keep_bit = match Self::most_common_bit(&data, i) {
+                    Some(x) if x == 1 => {
+                        if use_most_common {
+                            '1'
+                        } else {
+                            '0'
+                        }
+                    }
+                    Some(x) if x == 0 => {
+                        if use_most_common {
+                            '0'
+                        } else {
+                            '1'
+                        }
+                    }
+                    None => {
+                        if use_most_common {
+                            '1'
+                        } else {
+                            '0'
+                        }
+                    }
+                    _ => continue,
+                };
+
+                data = data
+                    .into_iter()
+                    .filter(|s| matches!(s.chars().nth(i), Some(c) if c == keep_bit))
+                    .collect::<Vec<_>>();
+
+                if data.len() == 1 {
+                    break;
+                }
+            }
+
+            u32::from_str_radix(&data[0], 2).unwrap_or(0)
         }
     }
 }
