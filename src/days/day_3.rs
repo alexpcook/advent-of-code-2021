@@ -3,11 +3,11 @@ use diagnostic::BinaryDiagnostic;
 pub fn main() {
     println!("### day 3 ###");
 
-    let binary_diagnostic =
-        BinaryDiagnostic::from_file("./day_3.txt").expect("could not read input file");
-
     // Part 1
-    println!("part 1: {}", binary_diagnostic.power_consumption());
+    println!(
+        "part 1: {}",
+        BinaryDiagnostic::power_consumption("./day_3.txt").expect("could not read input file")
+    );
 
     // Part 2
     println!("part 2: {}", 0);
@@ -22,14 +22,11 @@ mod diagnostic {
     static BINARY_LINE_LENGTH: usize = 12;
 
     /// The binary diagnostic info for the submarine.
-    pub struct BinaryDiagnostic {
-        gamma_rate: u32,
-        epsilon_rate: u32,
-    }
+    pub struct BinaryDiagnostic;
 
     impl BinaryDiagnostic {
-        /// Calculate the binary diagnostic for the submarine from an input file at `path`.
-        pub fn from_file(path: &str) -> io::Result<BinaryDiagnostic> {
+        /// Calculate the power consumption of the submarine from an input file at `path`.
+        pub fn power_consumption(path: &str) -> io::Result<u32> {
             let (gamma_rate, epsilon_rate) = io::BufReader::new(File::open(Path::new(path))?)
                 .lines()
                 .map(|l| l.unwrap_or_default())
@@ -64,15 +61,10 @@ mod diagnostic {
                 );
 
             // Parse the gamma and epsilon strings into binary numbers
-            Ok(BinaryDiagnostic {
-                gamma_rate: u32::from_str_radix(&gamma_rate, 2).unwrap_or(0),
-                epsilon_rate: u32::from_str_radix(&epsilon_rate, 2).unwrap_or(0),
-            })
-        }
+            let gamma_rate = u32::from_str_radix(&gamma_rate, 2).unwrap_or(0);
+            let epsilon_rate = u32::from_str_radix(&epsilon_rate, 2).unwrap_or(0);
 
-        /// Calculates the power consumption of the submarine.
-        pub fn power_consumption(&self) -> u32 {
-            self.gamma_rate * self.epsilon_rate
+            Ok(gamma_rate * epsilon_rate)
         }
     }
 }
