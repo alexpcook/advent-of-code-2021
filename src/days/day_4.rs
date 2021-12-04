@@ -10,18 +10,25 @@ mod bingo {
     use std::collections::HashSet;
     use std::fs;
 
+    /// A bingo square.
+    #[derive(Debug, Default)]
+    struct Square {
+        number: u32,
+        marked: bool,
+    }
+
     /// A bingo board.
     #[derive(Debug, Default)]
-    struct Board([[(u32, bool); 5]; 5]);
+    struct Board([[Square; 5]; 5]);
 
     impl Board {
         /// If `number` is present, it is marked and its coordinates are returned.
         fn mark(&mut self, number: u32) -> Option<(usize, usize)> {
             for i in 0..5 {
                 for j in 0..5 {
-                    let (n, _) = self.0[i][j];
+                    let Square { number: n, .. } = self.0[i][j];
                     if n == number {
-                        self.0[i][j].1 = true;
+                        self.0[i][j].marked = true;
                         return Some((i, j));
                     }
                 }
@@ -34,7 +41,7 @@ mod bingo {
             for i in 0..5 {
                 let mut is_winner = false;
                 for j in 0..5 {
-                    let (_, marked) = self.0[i][j];
+                    let Square { marked, .. } = self.0[i][j];
                     if marked {
                         is_winner = true;
                     } else {
@@ -50,7 +57,7 @@ mod bingo {
             for i in 0..5 {
                 let mut is_winner = false;
                 for j in 0..5 {
-                    let (_, marked) = self.0[j][i];
+                    let Square { marked, .. } = self.0[j][i];
                     if marked {
                         is_winner = true;
                     } else {
@@ -71,8 +78,8 @@ mod bingo {
             let mut score = 0;
             for i in 0..5 {
                 for j in 0..5 {
-                    if !self.0[i][j].1 {
-                        score += self.0[i][j].0;
+                    if !self.0[i][j].marked {
+                        score += self.0[i][j].number;
                     }
                 }
             }
@@ -114,12 +121,15 @@ mod bingo {
                 let mut board = Board::default();
 
                 for (i, &raw_row) in raw_board.iter().enumerate() {
-                    for (j, num) in raw_row
+                    for (j, number) in raw_row
                         .split_whitespace()
                         .map(|s| s.parse::<u32>().unwrap())
                         .enumerate()
                     {
-                        board.0[i][j] = (num, false);
+                        board.0[i][j] = Square {
+                            number,
+                            marked: false,
+                        };
                     }
                 }
 
