@@ -10,6 +10,9 @@ mod bingo {
     use std::collections::HashSet;
     use std::fs;
 
+    /// The number of entries per row and column on the bingo board.
+    const BOARD_LENGTH: usize = 5;
+
     /// A bingo square.
     #[derive(Debug, Default)]
     struct Square {
@@ -19,13 +22,13 @@ mod bingo {
 
     /// A bingo board.
     #[derive(Debug, Default)]
-    struct Board([[Square; 5]; 5]);
+    struct Board([[Square; BOARD_LENGTH]; BOARD_LENGTH]);
 
     impl Board {
         /// If `number` is present, it is marked and its coordinates are returned.
         fn mark(&mut self, number: u32) -> Option<(usize, usize)> {
-            for i in 0..5 {
-                for j in 0..5 {
+            for i in 0..BOARD_LENGTH {
+                for j in 0..BOARD_LENGTH {
                     let Square { number: n, .. } = self.0[i][j];
                     if n == number {
                         self.0[i][j].marked = true;
@@ -38,9 +41,9 @@ mod bingo {
 
         /// If this board is a winner, return its score wrapped in `Some`, else `None`.
         fn winner(&self) -> Option<u32> {
-            for i in 0..5 {
+            for i in 0..BOARD_LENGTH {
                 let mut is_winner = false;
-                for j in 0..5 {
+                for j in 0..BOARD_LENGTH {
                     let Square { marked, .. } = self.0[i][j];
                     if marked {
                         is_winner = true;
@@ -54,9 +57,9 @@ mod bingo {
                 }
             }
 
-            for i in 0..5 {
+            for i in 0..BOARD_LENGTH {
                 let mut is_winner = false;
-                for j in 0..5 {
+                for j in 0..BOARD_LENGTH {
                     let Square { marked, .. } = self.0[j][i];
                     if marked {
                         is_winner = true;
@@ -76,8 +79,8 @@ mod bingo {
         /// Returns the score for the board by summing all unmarked squares.
         fn score(&self) -> u32 {
             let mut score = 0;
-            for i in 0..5 {
-                for j in 0..5 {
+            for i in 0..BOARD_LENGTH {
+                for j in 0..BOARD_LENGTH {
                     if !self.0[i][j].marked {
                         score += self.0[i][j].number;
                     }
@@ -117,7 +120,7 @@ mod bingo {
 
             let mut boards = Vec::with_capacity(lines.len());
 
-            for raw_board in lines.get(1..).unwrap().chunks_exact(5) {
+            for raw_board in lines.get(1..).unwrap().chunks_exact(BOARD_LENGTH) {
                 let mut board = Board::default();
 
                 for (i, &raw_row) in raw_board.iter().enumerate() {
