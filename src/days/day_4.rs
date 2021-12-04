@@ -42,37 +42,19 @@ mod bingo {
         /// If this board is a winner, return its score wrapped in `Some`, else `None`.
         fn winner(&self) -> Option<u32> {
             for i in 0..BOARD_LENGTH {
-                let mut is_winner = false;
+                let (mut row_sum, mut col_sum) = (0, 0);
                 for j in 0..BOARD_LENGTH {
-                    let Square { marked, .. } = self.0[i][j];
-                    if marked {
-                        is_winner = true;
-                    } else {
-                        is_winner = false;
-                        break;
+                    if self.0[i][j].marked {
+                        row_sum += 1;
+                    }
+                    if self.0[j][i].marked {
+                        col_sum += 1;
                     }
                 }
-                if is_winner {
+                if row_sum == BOARD_LENGTH || col_sum == BOARD_LENGTH {
                     return Some(self.score());
                 }
             }
-
-            for i in 0..BOARD_LENGTH {
-                let mut is_winner = false;
-                for j in 0..BOARD_LENGTH {
-                    let Square { marked, .. } = self.0[j][i];
-                    if marked {
-                        is_winner = true;
-                    } else {
-                        is_winner = false;
-                        break;
-                    }
-                }
-                if is_winner {
-                    return Some(self.score());
-                }
-            }
-
             None
         }
 
