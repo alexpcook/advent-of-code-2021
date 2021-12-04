@@ -6,11 +6,16 @@ pub fn main() {
     // Part 1
     println!(
         "part 1: {}",
-        BinaryDiagnostic::power_consumption("./day_3.txt").expect("could not read input file")
+        BinaryDiagnostic::power_consumption("./day_3.txt")
+            .expect("could not calculate power consumption")
     );
 
     // Part 2
-    println!("part 2: {}", 0);
+    println!(
+        "part 2: {}",
+        BinaryDiagnostic::life_support_rating("./day_3.txt")
+            .expect("could not calculate life support rating")
+    );
 }
 
 mod diagnostic {
@@ -65,6 +70,11 @@ mod diagnostic {
             let epsilon_rate = u32::from_str_radix(&epsilon_rate, 2).unwrap_or(0);
 
             Ok(gamma_rate * epsilon_rate)
+        }
+
+        /// Calculate the life support rating of the submarine from an input file at `path`.
+        pub fn life_support_rating(path: &str) -> io::Result<u32> {
+            Ok(0)
         }
     }
 }
