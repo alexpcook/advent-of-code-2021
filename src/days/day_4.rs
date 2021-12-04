@@ -144,7 +144,7 @@ mod bingo {
 
         /// Plays the bingo game.
         pub fn play(mut self) {
-            let mut winners = HashSet::with_capacity(100);
+            let mut winners = HashSet::with_capacity(self.boards.len());
 
             for num in self.numbers {
                 for (i, board) in self.boards.iter_mut().enumerate() {
