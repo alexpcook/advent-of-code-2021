@@ -42,7 +42,7 @@ mod diagnostic {
             let mut epsilon_rate = String::with_capacity(BINARY_LINE_LENGTH);
 
             for i in 0..BINARY_LINE_LENGTH {
-                let (g, e) = match Self::most_common_bit(&self.data, i) {
+                let (g, e) = match Self::most_common_bit(&self.data.iter().collect::<Vec<_>>(), i) {
                     Some(x) if x == 1 => ('1', '0'),
                     Some(x) if x == 0 => ('0', '1'),
                     _ => continue,
@@ -69,7 +69,7 @@ mod diagnostic {
         /// and `None` if `1` and `0` are equally common.
         /// # Panics
         /// Panics if `position >= BINARY_LINE_LENGTH`.
-        fn most_common_bit(data: &[String], position: usize) -> Option<u8> {
+        fn most_common_bit(data: &[&String], position: usize) -> Option<u8> {
             if position >= BINARY_LINE_LENGTH {
                 panic!(
                     "cannot equal or exceed BINARY_LINE_LENGTH {}",
@@ -79,7 +79,7 @@ mod diagnostic {
 
             let result = data
                 .iter()
-                .flat_map(|s| s.chars().collect::<Vec<_>>())
+                .flat_map(|&s| s.chars().collect::<Vec<_>>())
                 .skip(position)
                 .step_by(BINARY_LINE_LENGTH)
                 .fold(0, |mut acc, c| {
@@ -101,7 +101,7 @@ mod diagnostic {
         /// Gets a rating for the submarine. If `use_most_common` is `true`, returns
         /// the oxygen generator rating, else returns the CO2 scrubber rating.
         fn get_rating(&self, use_most_common: bool) -> u32 {
-            let mut data = self.data.clone();
+            let mut data: Vec<_> = self.data.iter().collect();
 
             for i in 0..BINARY_LINE_LENGTH {
                 let keep_bit = match Self::most_common_bit(&data, i) {
@@ -131,7 +131,7 @@ mod diagnostic {
 
                 data = data
                     .into_iter()
-                    .filter(|s| matches!(s.chars().nth(i), Some(c) if c == keep_bit))
+                    .filter(|&s| matches!(s.chars().nth(i), Some(c) if c == keep_bit))
                     .collect::<Vec<_>>();
 
                 if data.len() == 1 {
@@ -139,7 +139,7 @@ mod diagnostic {
                 }
             }
 
-            u32::from_str_radix(&data[0], 2).unwrap_or(0)
+            u32::from_str_radix(data[0], 2).unwrap_or(0)
         }
     }
 }
