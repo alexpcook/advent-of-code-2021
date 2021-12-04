@@ -78,15 +78,15 @@ mod bingo {
 
         /// Returns the score for the board by summing all unmarked squares.
         fn score(&self) -> u32 {
-            let mut score = 0;
-            for i in 0..BOARD_LENGTH {
-                for j in 0..BOARD_LENGTH {
-                    if !self.0[i][j].marked {
-                        score += self.0[i][j].number;
+            self.0
+                .iter()
+                .flatten()
+                .fold(0, |mut score, &Square { number, marked }| {
+                    if !marked {
+                        score += number;
                     }
-                }
-            }
-            score
+                    score
+                })
         }
     }
 
