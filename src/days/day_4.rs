@@ -29,8 +29,7 @@ mod bingo {
         fn mark(&mut self, number: u32) -> Option<(usize, usize)> {
             for i in 0..BOARD_LENGTH {
                 for j in 0..BOARD_LENGTH {
-                    let Square { number: n, .. } = self.0[i][j];
-                    if n == number {
+                    if self.0[i][j].number == number {
                         self.0[i][j].marked = true;
                         return Some((i, j));
                     }
