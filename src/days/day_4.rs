@@ -11,12 +11,28 @@ mod bingo {
 
     /// A bingo board.
     #[derive(Debug, Default)]
-    struct Board([[(u8, bool); 5]; 5]);
+    struct Board([[(u32, bool); 5]; 5]);
+
+    impl Board {
+        /// If `number` is present, it is marked and its coordinates are returned.
+        fn mark(&mut self, number: u32) -> Option<(usize, usize)> {
+            for i in 0..5 {
+                for j in 0..5 {
+                    let (n, _) = self.0[i][j];
+                    if n == number {
+                        self.0[i][j].1 = true;
+                        return Some((i, j));
+                    }
+                }
+            }
+            None
+        }
+    }
 
     /// A bingo game.
     #[derive(Debug)]
     pub struct Game {
-        numbers: Vec<u8>,
+        numbers: Vec<u32>,
         boards: Vec<Board>,
     }
 
@@ -38,7 +54,7 @@ mod bingo {
                 .get(0)
                 .unwrap()
                 .split(',')
-                .map(|s| s.parse::<u8>().unwrap())
+                .map(|s| s.parse::<u32>().unwrap())
                 .collect::<Vec<_>>();
 
             let mut boards = Vec::with_capacity(lines.len());
@@ -49,7 +65,7 @@ mod bingo {
                 for (i, &raw_row) in raw_board.iter().enumerate() {
                     for (j, num) in raw_row
                         .split_whitespace()
-                        .map(|s| s.parse::<u8>().unwrap())
+                        .map(|s| s.parse::<u32>().unwrap())
                         .enumerate()
                     {
                         board.0[i][j] = (num, false);
