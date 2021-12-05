@@ -143,12 +143,7 @@ mod hydrothermal {
 
         /// Increments the count of vents at `key` by 1.
         fn increment_vent_count(map: &mut HashMap<(usize, usize), u32>, key: (usize, usize)) {
-            match map.get_mut(&key) {
-                Some(n) => *n += 1,
-                None => {
-                    map.insert(key, 1);
-                }
-            }
+            map.entry(key).and_modify(|count| *count += 1).or_insert(1);
         }
     }
 }
