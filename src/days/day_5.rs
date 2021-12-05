@@ -96,7 +96,7 @@ mod hydrothermal {
                 let y_range = Self::get_range(vent.p1.y, vent.p2.y);
 
                 if vent.p1.x == vent.p2.x || vent.p1.y == vent.p2.y || consider_diagonals {
-                    for point in x_range.into_iter().zip(y_range) {
+                    for point in x_range.zip(y_range) {
                         map.entry(point)
                             .and_modify(|count| *count += 1)
                             .or_insert(1);
