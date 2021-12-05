@@ -29,6 +29,22 @@ mod hydrothermal {
         y: usize,
     }
 
+    impl TryFrom<&str> for Point {
+        type Error = &'static str;
+
+        fn try_from(value: &str) -> Result<Self, Self::Error> {
+            let coordinates: Vec<usize> = value
+                .splitn(2, ',')
+                .map(|s| s.parse::<usize>().unwrap_or(0))
+                .collect();
+            let (x, y) = match coordinates.get(0..2) {
+                Some(rng) => (rng[0], rng[1]),
+                None => return Err("want two integers to construct point"),
+            };
+            Ok(Point { x, y })
+        }
+    }
+
     /// A hydrothermal vent.
     #[derive(Debug)]
     struct Vent {
@@ -44,49 +60,27 @@ mod hydrothermal {
         /// Parses hydrothermal vents from the file at `path`.
         pub fn from_file(path: &str) -> io::Result<Vents> {
             let mut vents = Vents(vec![]);
-
             let contents = fs::read_to_string(path)?;
+
             for line in contents.lines() {
                 let pairs = line.splitn(2, " -> ").collect::<Vec<&str>>();
-                if pairs.len() != 2 {
-                    return Err(io::Error::new(
-                        io::ErrorKind::Other,
-                        format!("want two pairs, got {}", pairs.len()),
-                    ));
-                }
 
-                let p1_coordinates = pairs[0]
-                    .splitn(2, ',')
-                    .map(|s| s.parse::<usize>().unwrap_or(0))
-                    .collect::<Vec<usize>>();
-                if p1_coordinates.len() != 2 {
-                    return Err(io::Error::new(
-                        io::ErrorKind::Other,
-                        format!("want two p1 coordinates, got {}", p1_coordinates.len()),
-                    ));
-                }
+                let (p1, p2) = match pairs.get(0..2) {
+                    Some(rng) => (
+                        Point::try_from(rng[0])
+                            .map_err(|e| io::Error::new(io::ErrorKind::Other, e))?,
+                        Point::try_from(rng[1])
+                            .map_err(|e| io::Error::new(io::ErrorKind::Other, e))?,
+                    ),
+                    None => {
+                        return Err(io::Error::new(
+                            io::ErrorKind::Other,
+                            "want two points to construct vent",
+                        ))
+                    }
+                };
 
-                let p2_coordinates = pairs[1]
-                    .splitn(2, ',')
-                    .map(|s| s.parse::<usize>().unwrap_or(0))
-                    .collect::<Vec<usize>>();
-                if p2_coordinates.len() != 2 {
-                    return Err(io::Error::new(
-                        io::ErrorKind::Other,
-                        format!("want two p2 coordinates, got {}", p2_coordinates.len()),
-                    ));
-                }
-
-                vents.0.push(Vent {
-                    p1: Point {
-                        x: p1_coordinates[0],
-                        y: p1_coordinates[1],
-                    },
-                    p2: Point {
-                        x: p2_coordinates[0],
-                        y: p2_coordinates[1],
-                    },
-                })
+                vents.0.push(Vent { p1, p2 })
             }
 
             Ok(vents)
