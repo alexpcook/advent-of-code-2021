@@ -17,6 +17,8 @@ mod hydrothermal {
     use std::fs;
     use std::io;
 
+    const MAP_SIZE: usize = 1000 * 1000;
+
     /// A point on the map.
     #[derive(Debug)]
     struct Point {
@@ -89,7 +91,7 @@ mod hydrothermal {
 
         /// Returns the number of points on the map where at least two vents overlap.
         pub fn overlaps(&self, consider_diagonals: bool) -> usize {
-            let mut map: HashMap<(usize, usize), u32> = HashMap::with_capacity(1000 * 1000);
+            let mut map: HashMap<(usize, usize), u32> = HashMap::with_capacity(MAP_SIZE);
             for vent in &self.0 {
                 if vent.p1.x == vent.p2.x {
                     let range = if vent.p1.y > vent.p2.y {
