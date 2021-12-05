@@ -6,10 +6,10 @@ pub fn main() {
     let vents = Vents::from_file("./day_5.txt").expect("could not read input file");
 
     // Part 1
-    println!("part 1: {}", vents.overlaps(false));
+    println!("part 1: {}", vents.overlapping(false));
 
     // Part 2
-    println!("part 2: {}", vents.overlaps(true));
+    println!("part 2: {}", vents.overlapping(true));
 }
 
 mod hydrothermal {
@@ -91,7 +91,7 @@ mod hydrothermal {
         }
 
         /// Returns the number of points on the map where at least two vents overlap.
-        pub fn overlaps(&self, consider_diagonals: bool) -> usize {
+        pub fn overlapping(&self, consider_diagonals: bool) -> usize {
             let mut map: HashMap<(usize, usize), u32> = HashMap::with_capacity(MAP_SIZE);
             for vent in &self.0 {
                 if vent.p1.x == vent.p2.x {
