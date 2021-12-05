@@ -17,18 +17,21 @@ mod hydrothermal {
     use std::fs;
     use std::io;
 
+    /// A point on the map.
     #[derive(Debug)]
     struct Point {
         x: usize,
         y: usize,
     }
 
+    /// A hydrothermal vent.
     #[derive(Debug)]
     struct Vent {
         p1: Point,
         p2: Point,
     }
 
+    /// The set of all hydrothermal vents on the submarine's map.
     #[derive(Debug)]
     pub struct Vents(Vec<Vent>);
 
