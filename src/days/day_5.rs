@@ -17,6 +17,7 @@ mod hydrothermal {
     use std::fs;
     use std::io;
 
+    /// The size of the submarine's hydrothermal vent map.
     const MAP_SIZE: usize = 1000 * 1000;
 
     /// A point on the map.
