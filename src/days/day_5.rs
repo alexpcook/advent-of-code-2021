@@ -13,12 +13,14 @@ pub fn main() {
 }
 
 mod hydrothermal {
+    use std::cmp::Ordering;
     use std::collections::HashMap;
     use std::fs;
     use std::io;
+    use std::iter;
 
-    /// The size of the submarine's hydrothermal vent map.
-    const MAP_SIZE: usize = 1000 * 1000;
+    /// The length/width of the submarine's hydrothermal vent map.
+    const MAP_SIZE: usize = 1000;
 
     /// A point on the map.
     #[derive(Debug)]
@@ -91,59 +93,38 @@ mod hydrothermal {
         }
 
         /// Returns the number of points on the map where at least two vents overlap.
-        pub fn overlapping(&self, consider_diagonals: bool) -> usize {
-            let mut map: HashMap<(usize, usize), u32> = HashMap::with_capacity(MAP_SIZE);
+        /// Only vents that are rows and columns are considered, unless `consider_diagonals` is `true`.
+        pub fn overlapping(&self, consider_diagonals: bool) -> u32 {
+            let mut map: HashMap<(usize, usize), u32> = HashMap::with_capacity(MAP_SIZE * MAP_SIZE);
+
             for vent in &self.0 {
-                if vent.p1.x == vent.p2.x {
-                    let range = if vent.p1.y > vent.p2.y {
-                        vent.p2.y..vent.p1.y + 1
-                    } else {
-                        vent.p1.y..vent.p2.y + 1
-                    };
-                    for i in range {
-                        let key = (vent.p1.x, i);
-                        Self::increment_vent_count(&mut map, key);
-                    }
-                } else if vent.p1.y == vent.p2.y {
-                    let range = if vent.p1.x > vent.p2.x {
-                        vent.p2.x..vent.p1.x + 1
-                    } else {
-                        vent.p1.x..vent.p2.x + 1
-                    };
-                    for i in range {
-                        let key = (i, vent.p1.y);
-                        Self::increment_vent_count(&mut map, key);
-                    }
-                } else if consider_diagonals {
-                    let (x_range, y_range, reverse_y) = if vent.p1.x > vent.p2.x {
-                        if vent.p1.y > vent.p2.y {
-                            (vent.p2.x..vent.p1.x + 1, vent.p2.y..vent.p1.y + 1, false)
-                        } else {
-                            (vent.p2.x..vent.p1.x + 1, vent.p1.y..vent.p2.y + 1, true)
-                        }
-                    } else if vent.p1.y > vent.p2.y {
-                        (vent.p1.x..vent.p2.x + 1, vent.p2.y..vent.p1.y + 1, true)
-                    } else {
-                        (vent.p1.x..vent.p2.x + 1, vent.p1.y..vent.p2.y + 1, false)
-                    };
-                    if reverse_y {
-                        for key in x_range.zip(y_range.rev()) {
-                            Self::increment_vent_count(&mut map, key);
-                        }
-                    } else {
-                        for key in x_range.zip(y_range) {
-                            Self::increment_vent_count(&mut map, key);
-                        }
+                let (x_range, is_row): (Vec<usize>, bool) = match vent.p1.x.cmp(&vent.p2.x) {
+                    Ordering::Equal => (iter::repeat(vent.p1.x).take(MAP_SIZE).collect(), true),
+                    Ordering::Less => ((vent.p1.x..vent.p2.x + 1).collect(), false),
+                    Ordering::Greater => ((vent.p2.x..vent.p1.x + 1).rev().collect(), false),
+                };
+
+                let (y_range, is_col): (Vec<usize>, bool) = match vent.p1.y.cmp(&vent.p2.y) {
+                    Ordering::Equal => (iter::repeat(vent.p1.y).take(MAP_SIZE).collect(), true),
+                    Ordering::Less => ((vent.p1.y..vent.p2.y + 1).collect(), false),
+                    Ordering::Greater => ((vent.p2.y..vent.p1.y + 1).rev().collect(), false),
+                };
+
+                if is_row || is_col || consider_diagonals {
+                    for point in x_range.into_iter().zip(y_range) {
+                        map.entry(point)
+                            .and_modify(|count| *count += 1)
+                            .or_insert(1);
                     }
                 }
             }
 
-            map.values().filter(|v| v > &&1).count()
-        }
-
-        /// Increments the count of vents at `key` by 1.
-        fn increment_vent_count(map: &mut HashMap<(usize, usize), u32>, key: (usize, usize)) {
-            map.entry(key).and_modify(|count| *count += 1).or_insert(1);
+            map.values().fold(0, |mut overlapping, &n| {
+                if n > 1 {
+                    overlapping += 1;
+                }
+                overlapping
+            })
         }
     }
 }
