@@ -92,19 +92,10 @@ mod hydrothermal {
             let mut map: HashMap<(usize, usize), u32> = HashMap::with_capacity(MAP_SIZE * MAP_SIZE);
 
             for vent in &self.0 {
-                let (x_range, is_row): (Vec<usize>, bool) = match vent.p1.x.cmp(&vent.p2.x) {
-                    Ordering::Equal => (iter::repeat(vent.p1.x).take(MAP_SIZE).collect(), true),
-                    Ordering::Less => ((vent.p1.x..vent.p2.x + 1).collect(), false),
-                    Ordering::Greater => ((vent.p2.x..vent.p1.x + 1).rev().collect(), false),
-                };
+                let x_range = Self::get_range(vent.p1.x, vent.p2.x);
+                let y_range = Self::get_range(vent.p1.y, vent.p2.y);
 
-                let (y_range, is_col): (Vec<usize>, bool) = match vent.p1.y.cmp(&vent.p2.y) {
-                    Ordering::Equal => (iter::repeat(vent.p1.y).take(MAP_SIZE).collect(), true),
-                    Ordering::Less => ((vent.p1.y..vent.p2.y + 1).collect(), false),
-                    Ordering::Greater => ((vent.p2.y..vent.p1.y + 1).rev().collect(), false),
-                };
-
-                if is_row || is_col || consider_diagonals {
+                if vent.p1.x == vent.p2.x || vent.p1.y == vent.p2.y || consider_diagonals {
                     for point in x_range.into_iter().zip(y_range) {
                         map.entry(point)
                             .and_modify(|count| *count += 1)
@@ -119,6 +110,15 @@ mod hydrothermal {
                 }
                 overlapping
             })
+        }
+
+        /// Returns an iterator from `first` to `second`.
+        fn get_range(first: usize, second: usize) -> Box<dyn Iterator<Item = usize>> {
+            match first.cmp(&second) {
+                Ordering::Equal => Box::new(iter::repeat(first).take(MAP_SIZE)),
+                Ordering::Less => Box::new(first..second + 1),
+                Ordering::Greater => Box::new((second..first + 1).rev()),
+            }
         }
     }
 }
