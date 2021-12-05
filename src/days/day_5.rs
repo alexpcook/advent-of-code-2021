@@ -102,11 +102,7 @@ mod hydrothermal {
                     };
                     for i in range {
                         let key = (vent.p1.x, i);
-                        if let Some(n) = map.get_mut(&key) {
-                            *n += 1;
-                        } else {
-                            map.insert(key, 1);
-                        }
+                        Self::increment_vent_count(&mut map, key);
                     }
                 } else if vent.p1.y == vent.p2.y {
                     let range = if vent.p1.x > vent.p2.x {
@@ -116,11 +112,7 @@ mod hydrothermal {
                     };
                     for i in range {
                         let key = (i, vent.p1.y);
-                        if let Some(n) = map.get_mut(&key) {
-                            *n += 1;
-                        } else {
-                            map.insert(key, 1);
-                        }
+                        Self::increment_vent_count(&mut map, key);
                     }
                 } else if consider_diagonals {
                     let (x_range, y_range, reverse_y) = if vent.p1.x > vent.p2.x {
@@ -136,25 +128,27 @@ mod hydrothermal {
                     };
                     if reverse_y {
                         for key in x_range.zip(y_range.rev()) {
-                            if let Some(n) = map.get_mut(&key) {
-                                *n += 1;
-                            } else {
-                                map.insert(key, 1);
-                            }
+                            Self::increment_vent_count(&mut map, key);
                         }
                     } else {
                         for key in x_range.zip(y_range) {
-                            if let Some(n) = map.get_mut(&key) {
-                                *n += 1;
-                            } else {
-                                map.insert(key, 1);
-                            }
+                            Self::increment_vent_count(&mut map, key);
                         }
                     }
                 }
             }
 
             map.values().filter(|v| v > &&1).count()
+        }
+
+        /// Increments the count of vents at `key` by 1.
+        fn increment_vent_count(map: &mut HashMap<(usize, usize), u32>, key: (usize, usize)) {
+            match map.get_mut(&key) {
+                Some(n) => *n += 1,
+                None => {
+                    map.insert(key, 1);
+                }
+            }
         }
     }
 }
