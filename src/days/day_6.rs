@@ -8,71 +8,56 @@ const DAYS_PART_2: u32 = 256;
 
 pub fn main() {
     let contents = fs::read_to_string("./day_6.txt").expect("could not read input file");
-    let mut lanternfish: Vec<Lanternfish> = contents
+    let lanternfish: Vec<u32> = contents
         .lines()
-        .map(|l| {
-            l.split(',')
-                .map(|s| s.parse::<u32>().unwrap_or(0))
-                .map(Lanternfish::new)
-        })
+        .map(|l| l.split(',').map(|s| s.parse::<u32>().unwrap_or(0)))
         .flatten()
         .collect();
 
     // Part 1
-    for day in 1..=DAYS_PART_1 {
-        let mut new_fish = vec![];
+    println!(
+        "after {} days, there are {} lanternfish",
+        DAYS_PART_1,
+        lanternfish::get_school(&lanternfish, DAYS_PART_1)
+    );
 
-        for fish in lanternfish.iter_mut() {
-            if let Some(f) = fish.age() {
-                new_fish.push(f);
-            }
-        }
-
-        for fish in new_fish {
-            lanternfish.push(fish);
-        }
-
-        println!(
-            "on day {}, there are {} lanternfish",
-            day,
-            lanternfish.len()
-        );
-    }
+    // Part 2
+    println!(
+        "after {} days, there are {} lanternfish",
+        DAYS_PART_2,
+        lanternfish::get_school(&lanternfish, DAYS_PART_2)
+    );
 }
 
-/// Models a lanternfish.
-#[derive(Debug)]
-struct Lanternfish(u32);
+mod lanternfish {
+    use std::cmp::Ordering;
 
-impl Default for Lanternfish {
-    fn default() -> Lanternfish {
-        Lanternfish(Self::TIMER_NEW_VALUE)
-    }
-}
+    /// The lanternfish reproduction rate.
+    const DOUBLING_RATE: usize = 7;
 
-impl Lanternfish {
-    /// Reset timer value for a lanternfish after reaching 0.
-    const TIMER_RESET_VALUE: u32 = 6;
+    /// The initial state of new lanternfish.
+    const INITIAL_STATE: u32 = 8;
 
-    /// Initial timer value for a new lanternfish.
-    const TIMER_NEW_VALUE: u32 = 8;
-
-    /// Creates a new lanternfish with `timer` internal state.
-    fn new(timer: u32) -> Lanternfish {
-        Lanternfish(timer)
+    /// Returns the total number of lanternfish (including the `initial_school`)
+    /// in the school after `days` time.
+    pub fn get_school(initial_school: &[u32], days: u32) -> u32 {
+        let mut new_fish = 0;
+        for (i, fish) in initial_school.iter().enumerate() {
+            println!("fish {}", i);
+            new_fish += get_offspring(*fish, days);
+        }
+        initial_school.len() as u32 + new_fish
     }
 
-    /// Ages a lanternfish by one day. Returns a new lanternfish if one was created.
-    fn age(&mut self) -> Option<Lanternfish> {
-        match self.0 {
-            0 => {
-                self.0 = Self::TIMER_RESET_VALUE;
-                Some(Self::default())
-            }
-            _ => {
-                self.0 -= 1;
-                None
-            }
+    /// Returns the total number of offspring for a lanternfish with
+    /// `initial_state` after `days` time.
+    fn get_offspring(initial_state: u32, days: u32) -> u32 {
+        match days.cmp(&initial_state) {
+            Ordering::Greater => (initial_state..days)
+                .step_by(DOUBLING_RATE)
+                .map(|day| 1 + get_offspring(INITIAL_STATE, days - day - 1))
+                .sum(),
+            _ => 0,
         }
     }
 }
