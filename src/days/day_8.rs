@@ -19,15 +19,9 @@ pub fn main() {
 
 /// Solution for part 1.
 fn part_1(input: &[(Vec<&str>, Vec<&str>)]) -> u32 {
-    let mut count = 0;
-    for line in input {
-        for digit in &line.1 {
-            match digit.len() {
-                // 1 = 2 parts, 4 = 4 parts, 7 = 3 parts, 8 = 7 parts
-                2 | 4 | 3 | 7 => count += 1,
-                _ => {}
-            }
-        }
-    }
-    count
+    input
+        .iter()
+        .flat_map(|line| &line.1)
+        .filter(|digit| matches!(digit.len(), 2 | 4 | 3 | 7)) // digit is 1, 4, 7, or 8
+        .fold(0, |count, _| count + 1)
 }
