@@ -28,7 +28,7 @@ fn part_1(input: &[(Vec<&str>, Vec<&str>)]) -> u32 {
         .iter()
         .flat_map(|line| &line.1)
         .filter(|digit| matches!(digit.len(), 2 | 4 | 3 | 7)) // digit is 1, 4, 7, or 8
-        .fold(0, |count, _| count + 1)
+        .fold(0, |count, _| count.checked_add(1).unwrap())
 }
 
 // Solution for part 2.
