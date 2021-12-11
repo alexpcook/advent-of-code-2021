@@ -63,7 +63,7 @@ mod heightmap {
                         Some(h) => h,
                         None => continue,
                     };
-                    if self.adjacent_heights(&(i, j)).iter().all(|h| height < h) {
+                    if self.adjacent_heights((i, j)).iter().all(|h| height < h) {
                         risk_level += 1 + height;
                     }
                 }
@@ -80,7 +80,7 @@ mod heightmap {
             for i in 0..MAP_SIZE {
                 for j in 0..MAP_SIZE {
                     if matches!(self.0.get(&(i, j)), Some(&h) if h < 9) {
-                        basins.push(self.basin_size(&(i, j), &mut visited_positions));
+                        basins.push(self.basin_size((i, j), &mut visited_positions));
                     }
                 }
             }
@@ -93,17 +93,17 @@ mod heightmap {
         /// to keep track of which coordinates have already been visited on the map.
         fn basin_size(
             &self,
-            position: &(usize, usize),
+            position: (usize, usize),
             visited_positions: &mut HashSet<(usize, usize)>,
         ) -> u32 {
             let mut size = 1;
-            visited_positions.insert(*position);
+            visited_positions.insert(position);
 
             for point in self.adjacent_points(position) {
                 if matches!(self.0.get(&point), Some(&x) if x < 9 && visited_positions.get(&point).is_none())
                 {
                     visited_positions.insert(point);
-                    size += self.basin_size(&point, visited_positions);
+                    size += self.basin_size(point, visited_positions);
                 }
             }
 
@@ -111,7 +111,7 @@ mod heightmap {
         }
 
         /// Gets a point's adjacent heights given a `position` on the map.
-        fn adjacent_heights(&self, position: &(usize, usize)) -> Vec<u32> {
+        fn adjacent_heights(&self, position: (usize, usize)) -> Vec<u32> {
             let mut adjacent_heights = Vec::with_capacity(4);
 
             for coordinate in self.adjacent_points(position) {
@@ -124,8 +124,8 @@ mod heightmap {
         }
 
         /// Gets a point's adjacent points given a `position` in the map.
-        fn adjacent_points(&self, position: &(usize, usize)) -> Vec<(usize, usize)> {
-            let &(x, y) = position;
+        fn adjacent_points(&self, position: (usize, usize)) -> Vec<(usize, usize)> {
+            let (x, y) = position;
             let mut adjacent_points = vec![];
 
             if let Some(x) = x.checked_sub(1) {
