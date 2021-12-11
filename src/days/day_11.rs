@@ -35,9 +35,11 @@ mod octopus {
             self.0
         }
 
-        /// Resets the internal state of the `Octopus` to `0`.
+        /// Resets the internal state of the `Octopus` to `0` if it flashed.
         fn reset(&mut self) {
-            self.0 = 0;
+            if self.0 > 9 {
+                self.0 = 0;
+            }
         }
     }
 
@@ -93,9 +95,7 @@ mod octopus {
         /// Resets all `Octopus` in the `Pod` that flashed.
         fn reset(&mut self) {
             for octopus in self.0.values_mut() {
-                if octopus.0 > 9 {
-                    octopus.reset();
-                }
+                octopus.reset();
             }
         }
     }
