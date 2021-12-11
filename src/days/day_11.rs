@@ -1,9 +1,9 @@
-use octopus::Octopus;
+use octopus::Pod;
 use std::path::Path;
 
 pub fn main() {
     let input_path = Path::new("./day_11.txt");
-    let octopus = Octopus::from_file(input_path).expect("could not read input file");
+    let pod = Pod::from_file(input_path).expect("could not read input file");
 }
 
 mod octopus {
@@ -25,6 +25,23 @@ mod octopus {
             Octopus(state)
         }
 
+        /// Increments the internal state of the `Octopus`, returning the new state value.
+        fn step(&mut self) -> u32 {
+            self.0 += 1;
+            self.0
+        }
+
+        /// Resets the internal state of the `Octopus` to `0`.
+        fn reset(&mut self) {
+            self.0 = 0;
+        }
+    }
+
+    /// Models a pod of octopus.
+    #[derive(Debug)]
+    pub struct Pod(HashMap<(usize, usize), u32>);
+
+    impl Pod {
         /// Constructs a pod of octopus from input `path`.
         pub fn from_file(path: &Path) -> io::Result<HashMap<(usize, usize), Octopus>> {
             let contents = fs::read_to_string(path)?;
@@ -34,7 +51,7 @@ mod octopus {
                 for (j, digit) in line.chars().enumerate() {
                     octopus.insert(
                         (i, j),
-                        Self::new(digit.to_digit(10).ok_or_else(|| {
+                        Octopus::new(digit.to_digit(10).ok_or_else(|| {
                             io::Error::new(
                                 io::ErrorKind::Other,
                                 format!("invalid octopus state: {}", digit),
