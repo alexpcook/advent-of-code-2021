@@ -10,5 +10,6 @@ fn main() {
     // days::day_7::main();
     // days::day_8::main();
     // days::day_9::main();
-    days::day_10::main();
+    // days::day_10::main();
+    days::day_11::main();
 }

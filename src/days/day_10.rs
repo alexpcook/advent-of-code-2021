@@ -32,7 +32,7 @@ pub fn main() {
 
 mod navigation {
     /// Returns the syntax error score for `chunk`.
-    /// 
+    ///
     /// # Panics
     /// Panics if `chunk` contains any unknown characters.
     pub fn syntax_error_score(chunk: &str) -> u32 {
