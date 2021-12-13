@@ -3,10 +3,17 @@ use std::path::Path;
 
 pub fn main() {
     let input_path = Path::new("./day_11.txt");
-    let mut pod = Pod::from_file(input_path).expect("could not read input file");
+    let mut pod_part_1 = Pod::from_file(input_path).expect("could not read input file");
+    let pod_part_2 = pod_part_1.clone();
 
     // Part 1
-    println!("part 1: flashes after 100 steps = {}", pod.simulate(100));
+    println!(
+        "part 1: flashes after 100 steps = {}",
+        pod_part_1.simulate(100)
+    );
+
+    // Part 2
+    println!("part 2: steps until sync = {}", pod_part_2.sync());
 }
 
 mod octopus {
@@ -20,13 +27,18 @@ mod octopus {
     const POD_SIZE: usize = 10;
 
     /// Models an octopus.
-    #[derive(Debug)]
+    #[derive(Clone, Debug)]
     pub struct Octopus(u32);
 
     impl Octopus {
         /// Constructs a new `Octopus` with internal `state`.
         fn new(state: u32) -> Octopus {
             Octopus(state)
+        }
+
+        /// Returns the current internal state of the `Octopus`.
+        fn state(&self) -> u32 {
+            self.0
         }
 
         /// Increments the internal state of the `Octopus`, returning the new state value.
@@ -44,7 +56,7 @@ mod octopus {
     }
 
     /// Models a pod of octopus.
-    #[derive(Debug)]
+    #[derive(Clone, Debug)]
     pub struct Pod(HashMap<(usize, usize), Octopus>);
 
     impl Pod {
@@ -80,16 +92,93 @@ mod octopus {
             flashed
         }
 
-        /// Increments the state of all `Octopus` in the `Pod`.
-        fn step(&mut self) -> u32 {
-            let mut flashed = 0;
-            for octopus in self.0.values_mut() {
-                let new_state = octopus.step();
-                if new_state == 10 {
-                    flashed += 1;
+        /// Returns the number of steps until the `Pod` is in sync.
+        pub fn sync(mut self) -> u32 {
+            let mut step = 0;
+            loop {
+                step += 1;
+                self.simulate(1);
+                if self.0.values().all(|o| o.state() == 0) {
+                    break;
                 }
             }
+            step
+        }
+
+        /// Increments the state of all `Octopus` in the `Pod`, returning
+        /// the number of octopus that flashed during this step.
+        fn step(&mut self) -> u32 {
+            let mut flashed_positions = vec![];
+            for (&position, octopus) in self.0.iter_mut() {
+                if octopus.step() == 10 {
+                    flashed_positions.push(position);
+                }
+            }
+            self.flash(flashed_positions)
+        }
+
+        /// Returns the number of flashes given an initial vector of `flashed_positions`.
+        fn flash(&mut self, flashed_positions: Vec<(usize, usize)>) -> u32 {
+            let mut flashed = 0;
+
+            for position in flashed_positions {
+                flashed += 1;
+                let mut more_flashed_positions = vec![];
+
+                for adjacent in self.adjacent_positions(position) {
+                    match self.0.get_mut(&adjacent) {
+                        Some(octopus) => {
+                            if octopus.step() == 10 {
+                                more_flashed_positions.push(adjacent);
+                            }
+                        }
+                        None => continue,
+                    }
+                }
+
+                flashed += self.flash(more_flashed_positions);
+            }
+
             flashed
+        }
+
+        /// Returns the adjacent pod positions for `position`.
+        fn adjacent_positions(&self, position: (usize, usize)) -> Vec<(usize, usize)> {
+            let (x, y) = position;
+            let mut adjacent = vec![];
+
+            let (has_left, has_right, has_up, has_down) =
+                (x > 0, x < POD_SIZE - 1, y > 0, y < POD_SIZE - 1);
+
+            if has_left {
+                adjacent.push((x - 1, y));
+                if has_up {
+                    adjacent.push((x - 1, y - 1));
+                }
+                if has_down {
+                    adjacent.push((x - 1, y + 1));
+                }
+            }
+
+            if has_right {
+                adjacent.push((x + 1, y));
+                if has_up {
+                    adjacent.push((x + 1, y - 1));
+                }
+                if has_down {
+                    adjacent.push((x + 1, y + 1));
+                }
+            }
+
+            if has_up {
+                adjacent.push((x, y - 1));
+            }
+
+            if has_down {
+                adjacent.push((x, y + 1));
+            }
+
+            adjacent
         }
 
         /// Resets all `Octopus` in the `Pod` that flashed.
