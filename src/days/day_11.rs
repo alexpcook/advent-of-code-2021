@@ -55,6 +55,12 @@ mod octopus {
         }
     }
 
+    impl fmt::Display for Octopus {
+        fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
+            write!(f, "{}", self.0)
+        }
+    }
+
     /// Models a pod of octopus.
     #[derive(Clone, Debug)]
     pub struct Pod(HashMap<(usize, usize), Octopus>);
@@ -193,7 +199,7 @@ mod octopus {
         fn fmt(&self, f: &mut fmt::Formatter) -> fmt::Result {
             for i in 0..POD_SIZE {
                 for j in 0..POD_SIZE {
-                    write!(f, "{}", self.0.get(&(i, j)).unwrap_or(&Octopus::new(0)).0)?;
+                    write!(f, "{}", self.0.get(&(i, j)).unwrap_or(&Octopus::new(0)))?;
                 }
                 writeln!(f)?;
             }
