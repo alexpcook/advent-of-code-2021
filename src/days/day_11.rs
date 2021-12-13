@@ -2,6 +2,8 @@ use octopus::Pod;
 use std::path::Path;
 
 pub fn main() {
+    println!("### day 11 ###");
+
     let input_path = Path::new("./day_11.txt");
     let mut pod_part_1 = Pod::from_file(input_path).expect("could not read input file");
     let pod_part_2 = pod_part_1.clone();
